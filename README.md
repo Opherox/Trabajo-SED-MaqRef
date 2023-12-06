@@ -27,4 +27,4 @@ Diseñe una máquina expendedora de refrescos. Admite monedas de 10c, 20c, 50c y
 
 Mejoras:
 
-• Se ha decidido añadir una selección de producto, de forma que hay varios y no todos cuentan lo mismo.
+• Se ha decidido añadir una selección de producto, de forma que hay varios y no todos cuestan lo mismo.
