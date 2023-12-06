@@ -2,7 +2,7 @@
 
 Trabajo SED Parte VHDL: Maquina de refrescos. Grupo 14. Tutor: Luis Castedo
 
-## **Miembros equipo:**
+## **Miembros del grupo:**
 
 | Nombre | Número de matricula |
 | ------ | ------------------- |
