@@ -11,10 +11,15 @@ Miembros equipo:
 Requisitos generales:
 
 • Utilizar entradas manuales (pulsadores, switches, etc.) y salidas (LEDs, Displays de 7 segmentos, etc.)
+
 • Sincronizar las entradas
+
 • Utilizar la señal de reloj de la placa
+
 • Utilizar señal de RESET
+
 • Utilizar una máquina de estados
+
 
 Descripción de tarea:
 
