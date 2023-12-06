@@ -4,9 +4,9 @@ Trabajo SED Parte VHDL: Maquina de refrescos. Grupo 14. Tutor: Luis Castedo
 
 ## **Miembros equipo:**
 
-| Nombre | Numero de matricula |
+| Nombre | Número de matricula |
 | ------ | ------------------- |
-| Fernando Moreno Santa Cruz | 1 |
+| Fernando Moreno Santa Cruz | 56000 |
 | David Pinto Llorente | 56033 |
 | Miguel Ángel Pascual Collar | 55584 |
 
