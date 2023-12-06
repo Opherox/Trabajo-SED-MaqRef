@@ -10,15 +10,15 @@ Trabajo SED VHDL: Maquina de refrescos. Grupo 14. Tutor: Luis Castedo
 
 **Requisitos generales:**
 
-• Utilizar entradas manuales (pulsadores, switches, etc.) y salidas (LEDs, Displays de 7 segmentos, etc.)
+* Utilizar entradas manuales (pulsadores, switches, etc.) y salidas (LEDs, Displays de 7 segmentos, etc.)
 
-• Sincronizar las entradas
+* Sincronizar las entradas
 
-• Utilizar la señal de reloj de la placa
+* Utilizar la señal de reloj de la placa
 
-• Utilizar señal de RESET
+* Utilizar señal de RESET
 
-• Utilizar una máquina de estados
+* Utilizar una máquina de estados
 
 
 **Descripción de tarea:**
@@ -27,4 +27,4 @@ Diseñe una máquina expendedora de refrescos. Admite monedas de 10c, 20c, 50c y
 
 **Mejoras propuestas:**
 
-• Se ha decidido añadir una selección de producto, de forma que hay varios y no todos cuestan lo mismo.
+* Se ha decidido añadir una selección de producto, de forma que hay varios y no todos cuestan lo mismo.
