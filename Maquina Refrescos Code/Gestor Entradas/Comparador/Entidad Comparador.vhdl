@@ -48,7 +48,7 @@ signal resultado:integer;
 begin
     process(clk,reset)
     begin
-    if reset = '1' then --se puede añadir un CE en lugar del reset
+    if reset = '1' then --se puede aÃ±adir un CE en lugar del reset
         resultado <= precio;
         dinero_justo <= '0';
         falta_dinero <= '0';
