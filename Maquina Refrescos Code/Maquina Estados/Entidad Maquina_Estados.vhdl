@@ -66,7 +66,7 @@ Registro_estados: process (RESET, CLK) --cambios estado sincronizados por reloj 
     end if;
     end process;    
 
-Actualizador_estados: process (InactividadDetectada,DineroJusto, EstadoActual)
+Actualizador_estados: process (InactividadDetectada, EstadoActual, SwitchesProductos, DineroJusto, SobraDinero, FaltaDinero)
     begin
         if InactividadDetectada = '1' then              --si se detecta inactividad desde cualquier estado se vuelve al estado E0 (reposo)
             EstadoSiguiente <= E0;
