@@ -87,7 +87,7 @@ Actualizador_estados: process (InactividadDetectada,DineroJusto, EstadoActual)
                     EstadoSiguiente <= E3;
                 elsif SobraDinero = '1' then            --si sobra dinero error y devolver producto
                     EstadoSiguiente <= E1;
-                    LEDS_E_D(4) <= '1', '0' after 2000 ms;  --4 LED de error de dinero se enciende si se mete cantidad no exacta superando el precio
+                    --LEDS_E_D(4) <= '1', '0' after 2000 ms;  --4 LED de error de dinero se enciende si se mete cantidad no exacta superando el precio. No se si deberia quedarse aqui o en el gestor de LEDS (process) por temas de fugacidad
                 elsif FaltaDinero = '1' then
                     EstadoSiguiente <= E2;
                 end if;
@@ -107,22 +107,22 @@ Gestor_Salidas_LED: process (EstadoActual, SobraDinero)      --gestor LEDS de es
             when E3 => LEDS_E_D(3) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(5) <= '1'; --si en estado entregar producto solo enciende LED estado EP y se devuelven monedas
         end case;
         if SobraDinero = '1' then
-            LEDS_E_D(4)<='1';
+            LEDS_E_D(4)<='1';           --si sobra dinero se enciende LED error dinero
         else
-            LEDS_E_D(4)<='0';
+            LEDS_E_D(4)<='0' after 2000 ms;           --sino se apaga a los 2 segundos
         end if;
     end process;
 
 Gestor_Display_7Segmentos: process (EstadoActual, Dinero, Precio)
-    variable Diferencia: integer := Precio;
+    variable Diferencia: integer := Precio;                      --Dinero restante para dinero justo, en verdad para lo poco que se usa se podria poner la operacion directamente
     begin
     Diferencia := Precio-Dinero;
-        if EstadoActual = E2 then   --mostrar dinero restante
+        if EstadoActual = E2 then   --En estado introducir dinero mostrar dinero restante para dinero justo
             SecuenciaSegm(0) <= 0;                               --unidades, no va a haber nunca
             SecuenciaSegm(1) <= (Diferencia/10) mod 10;          --decenas, resto de dividir Diferencia/10 entre 10
             SecuenciaSegm(2) <= (Diferencia/100);                 --centenas, division exacta de Diferencia/100
             SecuenciaSegm(3) <= 0;                               --miles, no va a haber nunca
-        elsif EstadoActual = E3 then    --mostrar el producto a entregar
+        elsif EstadoActual = E3 then    --En estado entrega producto mostrar el producto a entregar
             case Precio is
                 when 100 => SecuenciaSegm(0) <= 1; SecuenciaSegm(1) <= 9+16; --P1, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
                 when 120 => SecuenciaSegm(0) <= 2; SecuenciaSegm(1) <= 9+16; --P2, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
@@ -133,7 +133,7 @@ Gestor_Display_7Segmentos: process (EstadoActual, Dinero, Precio)
             for i in 2 to 7 loop
                 SecuenciaSegm(i) <= 9+27;                                    --Rellenar con - los displays no usados
             end loop;
-        else
+        else                                                                 --En los demas estados no se usan los displays
             for i in 0 to 7 loop
                 SecuenciaSegm(i) <= 9+27;                                    --Rellenar con - los displays no usados
             end loop;
