@@ -51,6 +51,8 @@ Actualizador_inactividad: process (SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C)
             when "0000" => InactividadDetectada <= '1' after 30000 ms;
             when others => InactividadDetectada <= '0';
         end case;
+    else 
+        InactividadDetectada <= '0';
     end if;     
     end process;
 
