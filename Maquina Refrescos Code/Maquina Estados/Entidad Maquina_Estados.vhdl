@@ -18,7 +18,7 @@ Dinero: in integer;
 FaltaDinero: in std_logic;
 DineroJusto: in std_logic;
 SobraDinero: in std_logic;
-Precio: out integer;
+Precio: out integer := 1000000;
 SecuenciaSegm: out integer_vector (7 downto 0);
 LEDS_E_D: out std_logic_vector (15 downto 0); --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero.
 Reset_D: out std_logic);
@@ -74,6 +74,7 @@ Actualizador_estados: process (InactividadDetectada,DineroJusto, EstadoActual)
                 EstadoSiguiente <= E1;
             elsif EstadoActual = E1 then                --en estado E1, dependiendo del producto elegido el precio se pone a algo, pero se pasa a E2 (insertar monedas)
                 Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
+                Precio <= 1000000;                      --asignacion valor muy alto para evitar regalar productos (especie de reset de precio)
                 case SwitchesProductos is
                     when "0001" => EstadoSiguiente <= E2; Precio <= 100; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
                     when "0010" => EstadoSiguiente <= E2; Precio <= 120; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
@@ -97,14 +98,46 @@ Actualizador_estados: process (InactividadDetectada,DineroJusto, EstadoActual)
         end if;
     end process;
 
-Gestor_Salidas_LED_Estados: process (EstadoActual)
+Gestor_Salidas_LED: process (EstadoActual, SobraDinero)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5)
     begin
-    case EstadoActual is
-        when E0 => LEDS_E_D(0) <= '1'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; --si en estado reposo solo enciende LED estado R
-        when E1 => LEDS_E_D(1) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; --si en estado seleccion producto solo enciende LED estado SP
-        when E2 => LEDS_E_D(2) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(3) <= '0'; --si en estado introducir dinero solo enciende LED estado ID
-        when E3 => LEDS_E_D(3) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; --si en estado entregar producto solo enciende LED estado EP
-    end case;
+        case EstadoActual is
+            when E0 => LEDS_E_D(0) <= '1'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '1'; --si en estado reposo solo enciende LED estado R y se devuelven monedas
+            when E1 => LEDS_E_D(1) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '1'; --si en estado seleccion producto solo enciende LED estado SP y se devuelven monedas
+            when E2 => LEDS_E_D(2) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '0'; --si en estado introducir dinero solo enciende LED estado ID, no se devuelven monedas
+            when E3 => LEDS_E_D(3) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(5) <= '1'; --si en estado entregar producto solo enciende LED estado EP y se devuelven monedas
+        end case;
+        if SobraDinero = '1' then
+            LEDS_E_D(4)<='1';
+        else
+            LEDS_E_D(4)<='0';
+        end if;
     end process;
+
+Gestor_Display_7Segmentos: process (EstadoActual, Dinero, Precio)
+    variable Diferencia: integer := Precio;
+    begin
+    Diferencia := Precio-Dinero;
+        if EstadoActual = E2 then   --mostrar dinero restante
+            SecuenciaSegm(0) <= 0;                               --unidades, no va a haber nunca
+            SecuenciaSegm(1) <= (Diferencia/10) mod 10;          --decenas, resto de dividir Diferencia/10 entre 10
+            SecuenciaSegm(2) <= (Diferencia/100);                 --centenas, division exacta de Diferencia/100
+            SecuenciaSegm(3) <= 0;                               --miles, no va a haber nunca
+        elsif EstadoActual = E3 then    --mostrar el producto a entregar
+            case Precio is
+                when 100 => SecuenciaSegm(0) <= 1; SecuenciaSegm(1) <= 9+16; --P1, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
+                when 120 => SecuenciaSegm(0) <= 2; SecuenciaSegm(1) <= 9+16; --P2, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
+                when 150 => SecuenciaSegm(0) <= 3; SecuenciaSegm(1) <= 9+16; --P3, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
+                when 200 => SecuenciaSegm(0) <= 4; SecuenciaSegm(1) <= 9+16; --P4, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
+                when others => SecuenciaSegm(0) <= 9+27; SecuenciaSegm(1) <= 9+27; --Representar --
+            end case;
+            for i in 2 to 7 loop
+                SecuenciaSegm(i) <= 9+27;                                    --Rellenar con - los displays no usados
+            end loop;
+        else
+            for i in 0 to 7 loop
+                SecuenciaSegm(i) <= 9+27;                                    --Rellenar con - los displays no usados
+            end loop;
+        end if;
+    end process;       
 
 end Behavioral;
