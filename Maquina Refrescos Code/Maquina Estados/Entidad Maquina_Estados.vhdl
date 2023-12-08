@@ -38,9 +38,8 @@ begin
 SwitchesProductos <= (SW_P4,SW_P3,SW_P2,SW_P1); --hacer un vector de interruptores para mas facilidad de uso (cases) 
 BotonesMonedas <= (B100C,B50C,B20C,B10C); --hacer un vector de botones para mas facilidad de uso (cases)  
 
-Actualizador_inactividad: process (SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C)
+Actualizador_inactividad: process (SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
     begin
-    --si hay alguien tocando alguna entrada no hay inactividad
     if BotonesMonedas = "0000" then
         case SwitchesProductos is  
             when "0000" => InactividadDetectada <= '1' after 30000 ms;
@@ -66,7 +65,7 @@ Registro_estados: process (RESET, CLK) --cambios estado sincronizados por reloj 
     end if;
     end process;    
 
-Actualizador_estados: process (InactividadDetectada, EstadoActual, SwitchesProductos, DineroJusto, SobraDinero, FaltaDinero)
+Actualizador_estados: process (InactividadDetectada, EstadoActual, SwitchesProductos, DineroJusto, SobraDinero, FaltaDinero)        --gestiona cambio de estados y outputs de reset_dinero y asignacion precio
     begin
         if InactividadDetectada = '1' then              --si se detecta inactividad desde cualquier estado se vuelve al estado E0 (reposo)
             EstadoSiguiente <= E0;
@@ -115,7 +114,7 @@ Gestor_Salidas_LED: process (EstadoActual, SobraDinero)      --gestor LEDS de es
         end if;
     end process;
 
-Gestor_Display_7Segmentos: process (EstadoActual, Dinero, Precio)
+Gestor_Display_7Segmentos: process (EstadoActual, Dinero, Precio)       --gestiona los valores a mandar al visualizador dependiendo del estado, el dinero y el precio
     variable Diferencia: integer := Precio;                      --Dinero restante para dinero justo, en verdad para lo poco que se usa se podria poner la operacion directamente
     begin
     Diferencia := Precio-Dinero;
