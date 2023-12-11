@@ -10,10 +10,19 @@ architecture Behavioral of SYNCHRNZR_tb is
   signal CLK_tb      : STD_LOGIC := '0';
   signal ASYNC_IN_tb : STD_LOGIC := '0';
   signal SYNC_OUT_tb : STD_LOGIC;
+  
+  COMPONENT SYNCHRNZR
+  port (
+      CLK : in STD_LOGIC;
+      ASYNC_IN : in STD_LOGIC;
+      SYNC_OUT : out STD_LOGIC
+    );
+  end component;
+  
 begin
   -- Instanciar la unidad bajo prueba (UUT)
-  uut: entity work.SYNCHRNZR
-    port map (
+  uut: SYNCHRNZR
+  port map (
       CLK => CLK_tb,
       ASYNC_IN => ASYNC_IN_tb,
       SYNC_OUT => SYNC_OUT_tb
@@ -22,9 +31,9 @@ begin
   -- Proceso para generar el reloj
   process
   begin
-    while now < 10000 ns loop
+    while now < 1000 ns loop
       CLK_tb <= not CLK_tb;
-      wait for 100 ps; -- Cambia la frecuencia ajustando este valor
+      wait for 1 ps; -- Cambia la frecuencia ajustando este valor
     end loop;
     wait;
   end process;
@@ -33,19 +42,17 @@ begin
   process
   begin
     ASYNC_IN_tb <= '0';
-    wait for 500 ns;
-    
+    wait for 100 ns;
     ASYNC_IN_tb <= '1';
+    wait for 200 ns;
+    ASYNC_IN_tb <= '0';
+    wait for 200 ns;
+    ASYNC_IN_tb <= '1';
+    wait for 300 ns;
+    ASYNC_IN_tb <= '0';
+    
     wait for 20 ns;
 
-    wait;
-  end process;
-
-  -- Proceso para imprimir resultados
-  process
-  begin
-    wait for 100 ns; -- Esperar a que el sistema se estabilice
-    report "SYNC_OUT_tb = " & std_logic'image(SYNC_OUT_tb);
     wait;
   end process;
 
