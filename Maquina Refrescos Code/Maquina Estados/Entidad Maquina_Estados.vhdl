@@ -18,7 +18,7 @@ Dinero: in integer;
 FaltaDinero: in std_logic;
 DineroJusto: in std_logic;
 SobraDinero: in std_logic;
-Precio: out integer := 1000000;
+Precio: out integer;
 SecuenciaSegm: out integer_vector (7 downto 0);
 LEDS_E_D: out std_logic_vector (15 downto 0); --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero.
 Reset_D: out std_logic);
