@@ -117,6 +117,9 @@ Gestor_Salidas_LED: process (EstadoActual, SobraDinero)      --gestor LEDS de es
         else
             LEDS_E_D(4)<='0' after 2000 ms;           --sino se apaga a los 2 segundos
         end if;
+        for i in 7 to 15 loop
+            LEDS_E_D(i) <= '0';
+        end loop;
     end process;
 
 Gestor_Display_7Segmentos: process (EstadoActual, Dinero, Precio_s)       --gestiona los valores a mandar al visualizador dependiendo del estado, el dinero y el precio
