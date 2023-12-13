@@ -1,8 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity Maquina_Estados is
 Port (
@@ -106,20 +104,22 @@ Actualizador_estados: process (InactividadDetectada, EstadoActual, SwitchesProdu
 
 Gestor_Salidas_LED: process (EstadoActual, SobraDinero)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5)
     begin
-        case EstadoActual is
-            when E0 => LEDS_E_D(0) <= '1'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '1'; --si en estado reposo solo enciende LED estado R y se devuelven monedas
-            when E1 => LEDS_E_D(1) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '1'; --si en estado seleccion producto solo enciende LED estado SP y se devuelven monedas
-            when E2 => LEDS_E_D(2) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '0'; --si en estado introducir dinero solo enciende LED estado ID, no se devuelven monedas
-            when E3 => LEDS_E_D(3) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(5) <= '1'; --si en estado entregar producto solo enciende LED estado EP y se devuelven monedas
-        end case;
-        if SobraDinero = '1' then
-            LEDS_E_D(4)<='1';           --si sobra dinero se enciende LED error dinero
-        else
-            LEDS_E_D(4)<='0' after 2000 ms;           --sino se apaga a los 2 segundos
+        if rising_edge (clk) then
+            case EstadoActual is
+                when E0 => LEDS_E_D(0) <= '1'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '1'; --si en estado reposo solo enciende LED estado R y se devuelven monedas
+                when E1 => LEDS_E_D(1) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '1'; --si en estado seleccion producto solo enciende LED estado SP y se devuelven monedas
+                when E2 => LEDS_E_D(2) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '0'; --si en estado introducir dinero solo enciende LED estado ID, no se devuelven monedas
+                when E3 => LEDS_E_D(3) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(5) <= '1'; --si en estado entregar producto solo enciende LED estado EP y se devuelven monedas
+            end case;
+            if SobraDinero = '1' then
+                LEDS_E_D(4)<='1';           --si sobra dinero se enciende LED error dinero
+            else
+                LEDS_E_D(4)<='0' after 2000 ms;           --sino se apaga a los 2 segundos
+            end if;
+            for i in 7 to 15 loop
+                LEDS_E_D(i) <= '0';
+            end loop;
         end if;
-        for i in 7 to 15 loop
-            LEDS_E_D(i) <= '0';
-        end loop;
     end process;
 
 Gestor_Display_7Segmentos: process (EstadoActual, Dinero, Precio_s)       --gestiona los valores a mandar al visualizador dependiendo del estado, el dinero y el precio
