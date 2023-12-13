@@ -4,8 +4,6 @@ use IEEE.NUMERIC_STD.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-type integer_vector is array (natural range <>) of integer;
-
 entity Maquina_Estados is
 Port (
 SW_P1: in std_logic;
