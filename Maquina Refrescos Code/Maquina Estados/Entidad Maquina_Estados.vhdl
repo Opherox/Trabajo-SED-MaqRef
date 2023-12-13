@@ -102,7 +102,7 @@ Actualizador_estados: process (InactividadDetectada, EstadoActual, SwitchesProdu
         Precio <= Precio_s;
     end process;
 
-Gestor_Salidas_LED: process (EstadoActual, SobraDinero)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5)
+Gestor_Salidas_LED: process (clk, EstadoActual, SobraDinero)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5)
     begin
         if rising_edge (clk) then
             case EstadoActual is
