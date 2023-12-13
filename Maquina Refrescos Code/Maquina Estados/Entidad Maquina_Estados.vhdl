@@ -1,6 +1,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+type integer_vector is array (natural range <>) of integer;
 
 entity Maquina_Estados is
 Port (
@@ -32,6 +36,8 @@ signal EstadoSiguiente: Estados;
 signal InactividadDetectada: std_logic := '1'; --para deteccion de inactividad y consecuente paso a reposo
 signal SwitchesProductos: std_logic_vector  (3 downto 0) := "0000";
 signal BotonesMonedas: std_logic_vector  (3 downto 0) := "0000";
+signal Precio_s: integer := 10000;
+signal SecuenciaSegm_s: integer_vector (7 downto 0):= (others => 0);
 
 begin
 
@@ -75,12 +81,12 @@ Actualizador_estados: process (InactividadDetectada, EstadoActual, SwitchesProdu
                 EstadoSiguiente <= E1;
             elsif EstadoActual = E1 then                --en estado E1, dependiendo del producto elegido el precio se pone a algo, pero se pasa a E2 (insertar monedas)
                 Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
-                Precio <= 1000000;                      --asignacion valor muy alto para evitar regalar productos (especie de reset de precio)
+                Precio_s <= 1000000;                      --asignacion valor muy alto para evitar regalar productos (especie de reset de precio)
                 case SwitchesProductos is
-                    when "0001" => EstadoSiguiente <= E2; Precio <= 100; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
-                    when "0010" => EstadoSiguiente <= E2; Precio <= 120; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
-                    when "0100" => EstadoSiguiente <= E2; Precio <= 150; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
-                    when "1000" => EstadoSiguiente <= E2; Precio <= 200; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
+                    when "0001" => EstadoSiguiente <= E2; Precio_s <= 100; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
+                    when "0010" => EstadoSiguiente <= E2; Precio_s <= 120; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
+                    when "0100" => EstadoSiguiente <= E2; Precio_s <= 150; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
+                    when "1000" => EstadoSiguiente <= E2; Precio_s <= 200; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
                     when others => EstadoSiguiente <= E1; --si hay dos interruptores, o mas, o ninguno accionados no se selecciona un producto (mas robusto)
                 end case; 
             elsif EstadoActual = E2 then                --transiciones desde estado introducir dinero
@@ -97,6 +103,7 @@ Actualizador_estados: process (InactividadDetectada, EstadoActual, SwitchesProdu
                 EstadoSiguiente <= E0 after 5000 ms;    --despues de 5 segundos se vuelve a estado reposo (tiempo de entrega producto)      
             end if;
         end if;
+        Precio <= Precio_s;
     end process;
 
 Gestor_Salidas_LED: process (EstadoActual, SobraDinero)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5)
@@ -114,31 +121,32 @@ Gestor_Salidas_LED: process (EstadoActual, SobraDinero)      --gestor LEDS de es
         end if;
     end process;
 
-Gestor_Display_7Segmentos: process (EstadoActual, Dinero, Precio)       --gestiona los valores a mandar al visualizador dependiendo del estado, el dinero y el precio
-    variable Diferencia: integer := Precio;                      --Dinero restante para dinero justo, en verdad para lo poco que se usa se podria poner la operacion directamente
+Gestor_Display_7Segmentos: process (EstadoActual, Dinero, Precio_s)       --gestiona los valores a mandar al visualizador dependiendo del estado, el dinero y el precio
+    variable Diferencia: integer := Precio_s;                      --Dinero restante para dinero justo, en verdad para lo poco que se usa se podria poner la operacion directamente
     begin
-    Diferencia := Precio-Dinero;
+    Diferencia := Precio_s-Dinero;
         if EstadoActual = E2 then   --En estado introducir dinero mostrar dinero restante para dinero justo
-            SecuenciaSegm(0) <= 0;                               --unidades, no va a haber nunca
-            SecuenciaSegm(1) <= (Diferencia/10) mod 10;          --decenas, resto de dividir Diferencia/10 entre 10
-            SecuenciaSegm(2) <= (Diferencia/100);                 --centenas, division exacta de Diferencia/100
-            SecuenciaSegm(3) <= 0;                               --miles, no va a haber nunca
+            SecuenciaSegm_s(0) <= 0;                               --unidades, no va a haber nunca
+            SecuenciaSegm_s(1) <= (Diferencia/10) mod 10;          --decenas, resto de dividir Diferencia/10 entre 10
+            SecuenciaSegm_s(2) <= (Diferencia/100);                --centenas, division exacta de Diferencia/100
+            SecuenciaSegm_s(3) <= 0;                               --miles, no va a haber nunca
         elsif EstadoActual = E3 then    --En estado entrega producto mostrar el producto a entregar
-            case Precio is
-                when 100 => SecuenciaSegm(0) <= 1; SecuenciaSegm(1) <= 9+16; --P1, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
-                when 120 => SecuenciaSegm(0) <= 2; SecuenciaSegm(1) <= 9+16; --P2, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
-                when 150 => SecuenciaSegm(0) <= 3; SecuenciaSegm(1) <= 9+16; --P3, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
-                when 200 => SecuenciaSegm(0) <= 4; SecuenciaSegm(1) <= 9+16; --P4, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
-                when others => SecuenciaSegm(0) <= 9+27; SecuenciaSegm(1) <= 9+27; --Representar --
+            case Precio_s is
+                when 100 => SecuenciaSegm_s(0) <= 1; SecuenciaSegm_s(1) <= 9+16; --P1, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
+                when 120 => SecuenciaSegm_s(0) <= 2; SecuenciaSegm_s(1) <= 9+16; --P2, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
+                when 150 => SecuenciaSegm_s(0) <= 3; SecuenciaSegm_s(1) <= 9+16; --P3, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
+                when 200 => SecuenciaSegm_s(0) <= 4; SecuenciaSegm_s(1) <= 9+16; --P4, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
+                when others => SecuenciaSegm_s(0) <= 9+27; SecuenciaSegm_s(1) <= 9+27; --Representar --
             end case;
             for i in 2 to 7 loop
-                SecuenciaSegm(i) <= 9+27;                                    --Rellenar con - los displays no usados
+                SecuenciaSegm_s(i) <= 9+27;                                    --Rellenar con - los displays no usados
             end loop;
         else                                                                 --En los demas estados no se usan los displays
             for i in 0 to 7 loop
-                SecuenciaSegm(i) <= 9+27;                                    --Rellenar con - los displays no usados
+                SecuenciaSegm_s(i) <= 9+27;                                    --Rellenar con - los displays no usados
             end loop;
         end if;
+    SecuenciaSegm <= SecuenciaSegm_s;
     end process;       
 
 end Behavioral;
