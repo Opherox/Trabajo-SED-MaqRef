@@ -153,7 +153,7 @@ Gestor_Display_7Segmentos: process (clk, EstadoActual, Dinero, Precio_s)       -
                 end loop;
             end if;
             SecuenciaSegm <= SecuenciaSegm_s;
-        end if    
+        end if;    
     end process;       
 
 end Behavioral;
