@@ -52,30 +52,17 @@ Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B1
         Contador <= to_unsigned(Tiempo_Inactividad, Contador'length); 
         InactividadDetectada <= '1'; 
     elsif rising_edge(clk) then
-        if BotonesMonedas = "0000" then --botones sin pulsar
-            if SwitchesProductos = "0000" then  --switches sin accionar
-                if Contador < to_unsigned(Tiempo_Inactividad, Contador'length) then --si el tiempo es menor que 30s se suma al contador 1
-                    Contador <= Contador + 1;
-                else    --sino el tiempo es igual y se detecta inactividad
-                    Contador <= to_unsigned(Tiempo_Inactividad, Contador'length);  
-                    InactividadDetectada <= '1';
-                end if;   
-            else --actividad en la entrada implica reiniciar el contador y no detectar actividad
-                Contador <= (others => '0');
+        if BotonesMonedas = "0000" and SwitchesProductos = "0000" then --botones sin pulsar y switches sin accionar
+            if Contador < to_unsigned(Tiempo_Inactividad, Contador'length) then --si el tiempo es menor que 30s se suma al contador 1
+                Contador <= Contador + 1;
                 InactividadDetectada <= '0';
-            end if;
-        elsif SwitchesProductos = "0000" then --switches sin accionar
-            if BotonesMonedas = "0000" then --botones sin pulsar
-                if Contador < to_unsigned(Tiempo_Inactividad, Contador'length) then   --si el tiempo es menor que 30s se suma al contador 1
-                Contador <= Contador + 1;   
-                else    --sino el tiempo es igual y se detecta inactividad
-                Contador <= to_unsigned(Tiempo_Inactividad, Contador'length); 
+            else    --sino el tiempo es igual y se detecta inactividad
+                Contador <= to_unsigned(Tiempo_Inactividad, Contador'length);  
                 InactividadDetectada <= '1';
-                end if;
-            else --actividad en la entrada implica reiniciar el contador y no detectar actividad
-                Contador <= (others => '0');
-                InactividadDetectada <= '0';
-            end if;
+            end if;   
+        else --actividad en la entrada implica reiniciar el contador y no detectar actividad
+            Contador <= (others => '0');
+            InactividadDetectada <= '0';
         end if;
     end if;
     IDetect <= InactividadDetectada;     
