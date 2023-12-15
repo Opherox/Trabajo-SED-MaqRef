@@ -1,4 +1,4 @@
-# Trabajo-SED-MaqRef
+# Trabajo SED Maquina de Refrescos
 
 Trabajo SED Parte VHDL: Maquina de refrescos. Grupo 14. Tutor: Luis Castedo
 
