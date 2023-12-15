@@ -29,8 +29,8 @@ architecture Behavioral of Maquina_Estados is
 
 type Estados is (E0,E1,E2,E3);
 
-constant Frecuencia_Reloj : integer := 100000000;
-constant Tiempo_Inactividad : integer := 30*Frecuencia_Reloj ; --reloj de 100Mhz -> 30 segundos son 
+constant Frecuencia_Reloj : positive := 100000000;
+constant Tiempo_Inactividad : positive := 30*Frecuencia_Reloj ; --los 30 segundos de inactividad
 
 signal EstadoActual: Estados := E0;
 signal EstadoSiguiente: Estados;
@@ -46,7 +46,7 @@ begin
 SwitchesProductos <= (SW_P4,SW_P3,SW_P2,SW_P1); --hacer un vector de interruptores para mas facilidad de uso (cases) 
 BotonesMonedas <= (B100C,B50C,B20C,B10C); --hacer un vector de botones para mas facilidad de uso (cases)  
 
-Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C, Reset)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
+Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C,Reset)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
     begin
     if Reset = '1' then
         Contador <= (others => '0'); 
@@ -69,9 +69,8 @@ Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B1
 
 Registro_estados: process (RESET, CLK) --cambios estado sincronizados por reloj o reset asincrono
     begin
-    if Reset = '0' then 
+    if Reset = '1' then 
        EstadoActual <= E0;
-       InactividadDetectada <= '1';
     elsif rising_edge (clk) then
        EstadoActual <= EstadoSiguiente;
     end if;
