@@ -92,6 +92,15 @@ begin
     SW_P4_tb <= '1';
     wait for 600 ns;
     SW_P4_tb <= '0';
+    Dinero_tb <= 150;
+    wait for 610 ns;
+    DJ_tb <= '1';
+    wait for 620 ns;
+    DJ_tb <= '0';
+    wait for 630 ns;
+    SD_tb <= '1';
+    wait for 900 ns;
+    SD_tb <= '0';
     wait for 40000 ns;
   end process;
                  
