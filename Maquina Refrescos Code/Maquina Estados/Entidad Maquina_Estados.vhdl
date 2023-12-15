@@ -39,7 +39,7 @@ signal SwitchesProductos: std_logic_vector  (3 downto 0) := "0000";
 signal BotonesMonedas: std_logic_vector  (3 downto 0) := "0000";
 signal Precio_s: integer := 10000;
 signal SecuenciaSegm_s: integer_vector (7 downto 0):= (others => 0);
-signal Contador : unsigned(63 downto 0) := (others => '1');
+signal Contador : unsigned(63 downto 0) := (others => '0');
 
 begin
 
@@ -49,19 +49,18 @@ BotonesMonedas <= (B100C,B50C,B20C,B10C); --hacer un vector de botones para mas 
 Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C, Reset)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
     begin
     if Reset = '1' then
-        Contador <= to_unsigned(Tiempo_Inactividad, Contador'length); 
+        Contador <= (others => '0'); 
         InactividadDetectada <= '1'; 
     elsif rising_edge(clk) then
         if BotonesMonedas = "0000" and SwitchesProductos = "0000" then --botones sin pulsar y switches sin accionar
-            if Contador < to_unsigned(Tiempo_Inactividad, Contador'length) then --si el tiempo es menor que 30s se suma al contador 1
-                Contador <= Contador + 1;
+            if Contador /= 0 then --si el tiempo no ha llegado a 0 se sigue contando
+                Contador <= Contador - 1;
                 InactividadDetectada <= '0';
-            else    --sino el tiempo es igual y se detecta inactividad
-                Contador <= to_unsigned(Tiempo_Inactividad, Contador'length);  
+            elsif Contador = 0 then    --sino el tiempo es igual y se detecta inactividad 
                 InactividadDetectada <= '1';
             end if;   
         else --actividad en la entrada implica reiniciar el contador y no detectar actividad
-            Contador <= (others => '0');
+            Contador <= to_unsigned(Tiempo_Inactividad, Contador'length);
             InactividadDetectada <= '0';
         end if;
     end if;
