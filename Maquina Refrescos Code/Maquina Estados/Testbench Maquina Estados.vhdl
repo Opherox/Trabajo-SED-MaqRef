@@ -71,7 +71,7 @@ begin
   begin
     while now < 32000 ms loop
       CLK_tb <= not CLK_tb;
-      wait for 1 ns; --frecuencia 1 pico segundo
+      wait for 1 ns; --frecuencia 1 nano segundo
     end loop;
     wait;
   end process;
