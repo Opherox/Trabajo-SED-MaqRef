@@ -38,7 +38,7 @@ signal EstadoSiguiente: Estados;
 signal InactividadDetectada: std_logic := '1'; --para deteccion de inactividad y consecuente paso a reposo
 signal SwitchesProductos: std_logic_vector  (3 downto 0) := "0000";
 signal BotonesMonedas: std_logic_vector  (3 downto 0) := "0000";
-signal Precio_s: integer := 10000;
+signal Precio_s: integer := 1000000;
 signal SecuenciaSegm_s: integer_vector (7 downto 0):= (others => 0);
 signal Contador : unsigned(Longitud_Contador downto 0) := (others => '0');
 
@@ -87,7 +87,6 @@ Actualizador_estados: process (clk,InactividadDetectada, EstadoActual, SwitchesP
                     EstadoSiguiente <= E1;
                 elsif EstadoActual = E1 then                --en estado E1, dependiendo del producto elegido el precio se pone a algo, pero se pasa a E2 (insertar monedas)
                     Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
-                    Precio_s <= 1000000;                      --asignacion valor muy alto para evitar regalar productos (especie de reset de precio)
                     case SwitchesProductos is
                         when "0001" => EstadoSiguiente <= E2; Precio_s <= 100; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
                         when "0010" => EstadoSiguiente <= E2; Precio_s <= 120; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
@@ -109,13 +108,27 @@ Actualizador_estados: process (clk,InactividadDetectada, EstadoActual, SwitchesP
                     EstadoSiguiente <= E0 after 5000 ms;    --despues de 5 segundos se vuelve a estado reposo (tiempo de entrega producto)      
                 end if;
             end if;
-        Precio <= Precio_s;
         end if;    
     end process;
-
+    
+Gestor_Precio: process (clk,EstadoActual)
+    begin
+        if rising_edge(clk) then
+            if EstadoActual = E0 then
+                Precio <= 1000000;
+            elsif EstadoActual = E1 then
+                Precio <= 1000000;
+            elsif EstadoActual = E2 then
+                Precio <= Precio_s; 
+            elsif EstadoActual = E3 then
+                Precio <= Precio_s;
+            end if;
+        end if;   
+    end process;
+     
 Gestor_Salidas_LED: process (clk, EstadoActual, SobraDinero)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5)
     begin
-        if rising_edge (clk) then
+        if rising_edge(clk) then
             case EstadoActual is
                 when E0 => LEDS_E_D(0) <= '1'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '1'; --si en estado reposo solo enciende LED estado R y se devuelven monedas
                 when E1 => LEDS_E_D(1) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(3) <= '0'; LEDS_E_D(5) <= '1'; --si en estado seleccion producto solo enciende LED estado SP y se devuelven monedas
