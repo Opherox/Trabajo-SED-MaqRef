@@ -18,6 +18,7 @@ Dinero: in integer;
 FaltaDinero: in std_logic;
 DineroJusto: in std_logic;
 SobraDinero: in std_logic;
+IDetect : out std_logic;    --PARA PRUEBAS, LUEGO COMENTAR
 Precio: out integer;
 SecuenciaSegm: out integer_vector (7 downto 0);
 LEDS_E_D: out std_logic_vector (15 downto 0); --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero.
@@ -27,6 +28,10 @@ end Maquina_Estados;
 architecture Behavioral of Maquina_Estados is
 
 type Estados is (E0,E1,E2,E3);
+
+constant Frecuencia_Reloj : integer := 100000000;
+constant Tiempo_Inactividad : integer := 30*Frecuencia_Reloj ; --reloj de 100Mhz -> 30 segundos son 
+
 signal EstadoActual: Estados := E0;
 signal EstadoSiguiente: Estados;
 signal InactividadDetectada: std_logic := '1'; --para deteccion de inactividad y consecuente paso a reposo
@@ -34,29 +39,46 @@ signal SwitchesProductos: std_logic_vector  (3 downto 0) := "0000";
 signal BotonesMonedas: std_logic_vector  (3 downto 0) := "0000";
 signal Precio_s: integer := 10000;
 signal SecuenciaSegm_s: integer_vector (7 downto 0):= (others => 0);
+signal Contador : integer range 0 to TIEMPO_INACTIVIDAD := 0;
 
 begin
 
 SwitchesProductos <= (SW_P4,SW_P3,SW_P2,SW_P1); --hacer un vector de interruptores para mas facilidad de uso (cases) 
 BotonesMonedas <= (B100C,B50C,B20C,B10C); --hacer un vector de botones para mas facilidad de uso (cases)  
 
-Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
+Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C, Reset)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
     begin
-    if rising_edge(clk) then
-        if BotonesMonedas = "0000" then
-            case SwitchesProductos is  
-                when "0000" => InactividadDetectada <= '1' after 30000 ms;
-                when others => InactividadDetectada <= '0'; --en teoria prevalece la segunda asignacion, si pasan 30 s desde que no hubo actividad pero esta habiendo actividad no estara InactividadDecectada a 1
-            end case;
-        elsif SwitchesProductos = "0000" then
-            case BotonesMonedas is
-                when "0000" => InactividadDetectada <= '1' after 30000 ms;
-                when others => InactividadDetectada <= '0';
-            end case;
-        else 
-            InactividadDetectada <= '0';
+    if Reset = '1' then
+        Contador <= 30;
+        InactividadDetectada <= '1'; 
+    elsif rising_edge(clk) then
+        if BotonesMonedas = "0000" then --botones sin pulsar
+            if SwitchesProductos = "0000" then  --switches sin accionar
+                if Contador < Tiempo_Inactividad then --si el tiempo es menor que 30s se suma al contador 1
+                    Contador <= Contador + 1;
+                else    --sino el tiempo es igual y se detecta inactividad
+                    Contador <= Tiempo_Inactividad; 
+                    InactividadDetectada <= '1';
+                end if;   
+            else --actividad en la entrada implica reiniciar el contador y no detectar actividad
+                Contador <= 0;
+                InactividadDetectada <= '0';
+            end if;
+        elsif SwitchesProductos = "0000" then --switches sin accionar
+            if BotonesMonedas = "0000" then --botones sin pulsar
+                if Contador < Tiempo_Inactividad then   --si el tiempo es menor que 30s se suma al contador 1
+                Contador <= Contador + 1;   
+                else    --sino el tiempo es igual y se detecta inactividad
+                Contador <= Tiempo_Inactividad; 
+                InactividadDetectada <= '1';
+                end if;
+            else --actividad en la entrada implica reiniciar el contador y no detectar actividad
+                Contador <= 0;
+                InactividadDetectada <= '0';
+            end if;
         end if;
-    end if;     
+    end if;
+    IDetect <= InactividadDetectada;     
     end process;
 
 Registro_estados: process (RESET, CLK) --cambios estado sincronizados por reloj o reset asincrono
