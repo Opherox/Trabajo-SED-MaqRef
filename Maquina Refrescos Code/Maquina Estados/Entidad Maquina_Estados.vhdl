@@ -29,9 +29,9 @@ architecture Behavioral of Maquina_Estados is
 
 type Estados is (E0,E1,E2,E3);
 
-constant Frecuencia_Reloj : integer := 100000000; --100MHz (reloj de la Nexys DDR4)
-constant Longitud_Contador : natural := 99; --ajustable por si hay sobrepaso de tamaño
-constant Tiempo_Inactividad : unsigned (Longitud_Contador downto 0) := to_unsigned(30 * Frecuencia_Reloj, Longitud_Contador+1) ; --los 30 segundos de inactividad
+constant Frecuencia_Reloj : integer := 100000000; --100 para poder verlo en los testbench; --100MHz (reloj de la Nexys DDR4)
+constant Longitud_Contador : natural := 128; --ajustable por si hay sobrepaso de tamaño
+--constant Tiempo_Inactividad : unsigned (Longitud_Contador downto 0) := to_unsigned(30 * Frecuencia_Reloj, Longitud_Contador+1) ; --los 30 segundos de inactividad
 
 signal EstadoActual: Estados := E0;
 signal EstadoSiguiente: Estados;
@@ -40,8 +40,10 @@ signal SwitchesProductos: std_logic_vector  (3 downto 0) := "0000";
 signal BotonesMonedas: std_logic_vector  (3 downto 0) := "0000";
 signal Precio_s: integer := 1000000;
 signal SecuenciaSegm_s: integer_vector (7 downto 0):= (others => 0);
-signal Contador : unsigned(Longitud_Contador downto 0) := (others => '0');
-
+--signal Contador : unsigned(Longitud_Contador downto 0) := (others => '0');
+signal Contador_R : integer := Frecuencia_Reloj;
+signal Contador_S : integer := 0;
+signal Contador_ED : integer := 0;
 begin
 
 SwitchesProductos <= (SW_P4,SW_P3,SW_P2,SW_P1); --hacer un vector de interruptores para mas facilidad de uso (cases) 
@@ -50,19 +52,34 @@ BotonesMonedas <= (B100C,B50C,B20C,B10C); --hacer un vector de botones para mas 
 Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C,Reset)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
     begin
     if Reset = '1' then
-        Contador <= (others => '0'); 
+        --Contador <= (others => '0');
+        Contador_R <= Frecuencia_Reloj;
+        Contador_S <= 0; 
         InactividadDetectada <= '1'; 
     elsif rising_edge(clk) then
         if BotonesMonedas = "0000" and SwitchesProductos = "0000" then --botones sin pulsar y switches sin accionar
-            if Contador /= 0 then --si el tiempo no ha llegado a 0 se sigue contando
-                Contador <= Contador - 1;
-            elsif Contador = 0 then    --sino el tiempo es igual y se detecta inactividad 
+            --if Contador /= 0 then --si el tiempo no ha llegado a 0 se sigue contando
+            --    Contador <= Contador - 1;
+            --elsif Contador = 0 then    --sino el tiempo es igual y se detecta inactividad 
+            --    InactividadDetectada <= '1';
+            --end if;
+            --prueba reductor reloj
+            if Contador_S < 30 then
+                if Contador_R /= 0 then
+                    Contador_R <= Contador_R - 1;
+                elsif Contador_R = 0 then
+                    Contador_S <= Contador_S + 1;
+                    Contador_R <= Frecuencia_Reloj;
+                end if;
+            elsif Contador_S = 30 then
                 InactividadDetectada <= '1';
-            end if;   
+            end if;       
         else --actividad en la entrada implica reiniciar el contador y no detectar actividad
-            Contador <= Tiempo_Inactividad;
+            --Contador <= Tiempo_Inactividad;
+            Contador_R <= Frecuencia_Reloj;
+            Contador_S <= 0;
             InactividadDetectada <= '0';
-        end if;
+        end if;  
     end if;
     IDetect <= InactividadDetectada;     
     end process;
@@ -136,18 +153,23 @@ Gestor_Salidas_LED: process (clk, EstadoActual, SobraDinero)      --gestor LEDS 
                 when E3 => LEDS_E_D(3) <= '1'; LEDS_E_D(0) <= '0'; LEDS_E_D(1) <= '0'; LEDS_E_D(2) <= '0'; LEDS_E_D(5) <= '1'; --si en estado entregar producto solo enciende LED estado EP y se devuelven monedas
             end case;
             if SobraDinero = '1' then
-                LEDS_E_D(4)<='1';           --si sobra dinero se enciende LED error dinero
+                LEDS_E_D(4) <='1';           --si sobra dinero se enciende LED error dinero
+                Contador_ED <= 200000000;    --20 para verlo en testbench   --2 segundos de led error de dinero encendido
             else
-                LEDS_E_D(4)<='0' after 2000 ms;           --sino se apaga a los 2 segundos
+                if Contador_ED /= 0 then
+                    Contador_ED <= Contador_ED -1;
+                elsif Contador_ED = 0 then
+                    LEDS_E_D(4)<= '0';           --tras 2 segundos se apaga
+                end if;
             end if;
-            for i in 7 to 15 loop
+            for i in 6 to 15 loop
                 LEDS_E_D(i) <= '0';
             end loop;
         end if;
     end process;
 
 Gestor_Display_7Segmentos: process (clk, EstadoActual, Dinero, Precio_s)       --gestiona los valores a mandar al visualizador dependiendo del estado, el dinero y el precio
-    variable Diferencia: integer := Precio_s;                      --Dinero restante para dinero justo, en verdad para lo poco que se usa se podria poner la operacion directamente
+    variable Diferencia : integer := Precio_s;                      --Dinero restante para dinero justo, en verdad para lo poco que se usa se podria poner la operacion directamente
     begin
         if rising_edge(clk) then
             Diferencia := Precio_s-Dinero;
@@ -164,15 +186,17 @@ Gestor_Display_7Segmentos: process (clk, EstadoActual, Dinero, Precio_s)       -
                     when 200 => SecuenciaSegm_s(0) <= 4; SecuenciaSegm_s(1) <= 9+16; --P4, 16 es el lugar que ocupa la P en el abecedario ingles (tocara convetirlo a segmentos)
                     when others => SecuenciaSegm_s(0) <= 9+27; SecuenciaSegm_s(1) <= 9+27; --Representar --
                 end case;
-                for i in 2 to 7 loop
+                for i in 2 to 5 loop
                     SecuenciaSegm_s(i) <= 9+27;                                    --Rellenar con - los displays no usados
                 end loop;
             else                                                                 --En los demas estados no se usan los displays
-                for i in 0 to 7 loop
+                for i in 0 to 5 loop
                     SecuenciaSegm_s(i) <= 9+27;                                    --Rellenar con - los displays no usados
                 end loop;
             end if;
-            SecuenciaSegm <= SecuenciaSegm_s;
+            SecuenciaSegm_s(6) <= Contador_S mod 10;        --unidades de segundos del tiempo de inactividad transcurrido
+            SecuenciaSegm_s(7) <= Contador_S/10;            --decenas de segundos del tiempo de inactividad transcurrido 
+            SecuenciaSegm <= SecuenciaSegm_s;               --pasar todos los valores a la salida para que vayan al visualizador
         end if;    
     end process;       
 
