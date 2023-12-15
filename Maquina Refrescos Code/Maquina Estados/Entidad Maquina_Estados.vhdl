@@ -49,7 +49,7 @@ BotonesMonedas <= (B100C,B50C,B20C,B10C); --hacer un vector de botones para mas 
 Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C, Reset)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
     begin
     if Reset = '1' then
-        Contador <= 30;
+        Contador <= Tiempo_Inactividad;
         InactividadDetectada <= '1'; 
     elsif rising_edge(clk) then
         if BotonesMonedas = "0000" then --botones sin pulsar
