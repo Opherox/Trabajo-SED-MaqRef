@@ -2,7 +2,7 @@
 
 La salida en los segmentos con valores especiales a tener en cuenta en el decodificador son las siguientes:
 
-* 36 : Se montrará por el display una -
+* 36 : Se mostrará por el display una -
 * 25 : Se mostrará por el display una P
 
 Los tiempos de los contadores son:
