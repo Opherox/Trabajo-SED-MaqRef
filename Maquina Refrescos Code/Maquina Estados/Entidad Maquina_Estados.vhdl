@@ -29,8 +29,9 @@ architecture Behavioral of Maquina_Estados is
 
 type Estados is (E0,E1,E2,E3);
 
-constant Frecuencia_Reloj : positive := 100000000;
-constant Tiempo_Inactividad : positive := 30*Frecuencia_Reloj ; --los 30 segundos de inactividad
+constant Frecuencia_Reloj : integer := 100000000; --100MHz (reloj de la Nexys DDR4)
+constant Longitud_Contador : natural := 99; --ajustable por si hay sobrepaso de tamaño
+constant Tiempo_Inactividad : unsigned (Longitud_Contador downto 0) := to_unsigned(30 * Frecuencia_Reloj, Longitud_Contador+1) ; --los 30 segundos de inactividad
 
 signal EstadoActual: Estados := E0;
 signal EstadoSiguiente: Estados;
@@ -39,7 +40,7 @@ signal SwitchesProductos: std_logic_vector  (3 downto 0) := "0000";
 signal BotonesMonedas: std_logic_vector  (3 downto 0) := "0000";
 signal Precio_s: integer := 10000;
 signal SecuenciaSegm_s: integer_vector (7 downto 0):= (others => 0);
-signal Contador : unsigned(63 downto 0) := (others => '0');
+signal Contador : unsigned(Longitud_Contador downto 0) := (others => '0');
 
 begin
 
@@ -55,12 +56,11 @@ Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B1
         if BotonesMonedas = "0000" and SwitchesProductos = "0000" then --botones sin pulsar y switches sin accionar
             if Contador /= 0 then --si el tiempo no ha llegado a 0 se sigue contando
                 Contador <= Contador - 1;
-                InactividadDetectada <= '0';
             elsif Contador = 0 then    --sino el tiempo es igual y se detecta inactividad 
                 InactividadDetectada <= '1';
             end if;   
         else --actividad en la entrada implica reiniciar el contador y no detectar actividad
-            Contador <= to_unsigned(Tiempo_Inactividad, Contador'length);
+            Contador <= Tiempo_Inactividad;
             InactividadDetectada <= '0';
         end if;
     end if;
