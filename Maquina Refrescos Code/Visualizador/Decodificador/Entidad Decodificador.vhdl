@@ -5,7 +5,6 @@ use IEEE.NUMERIC_STD.ALL;
 entity Decodificador is
 Port (
     Numero : in integer;
-    clk : in std_logic; 
     Segmentos : out std_logic_vector (6 downto 0)  
     );
 end Decodificador;
