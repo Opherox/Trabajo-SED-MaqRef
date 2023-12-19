@@ -54,7 +54,7 @@ Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B1
     if Reset = '1' then
         --Contador <= (others => '0');
         Contador_R <= Frecuencia_Reloj;
-        Contador_S <= 30; 
+        Contador_S <= 0; 
         InactividadDetectada <= '1'; 
     elsif rising_edge(clk) then
         if BotonesMonedas = "0000" and SwitchesProductos = "0000" then --botones sin pulsar y switches sin accionar
