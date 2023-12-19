@@ -153,6 +153,7 @@ begin
         Segm => Segm_S,
         DigSel => DigSel_S
         );   
+
 Segm <= Segm_S;
 DigSel <= DigSel_S;
 LED <= LED_S; 
