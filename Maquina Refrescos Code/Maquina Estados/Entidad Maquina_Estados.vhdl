@@ -116,6 +116,7 @@ Actualizador_estados: process (clk,InactividadDetectada, EstadoActual, SwitchesP
                         when others => EstadoSiguiente <= E1; --si hay dos interruptores, o mas, o ninguno accionados no se selecciona un producto (mas robusto)
                     end case; 
                 elsif EstadoActual = E2 then                --transiciones desde estado introducir dinero
+                    Reset_D <= '0';
                     if DineroJusto = '1' then               --si dinero justo ir a estado entregar producto
                         EstadoSiguiente <= E3;
                     elsif SobraDinero = '1' then            --si sobra dinero error y devolver producto
