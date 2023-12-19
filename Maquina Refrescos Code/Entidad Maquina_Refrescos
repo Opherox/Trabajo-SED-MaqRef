@@ -8,7 +8,7 @@ Port (
     SW : in std_logic_vector (3 downto 0);
     clk : in std_logic;
     Reset : in std_logic;
-    Segm : out std_logic_vector (7 downto 0);
+    Segm : out std_logic_vector (6 downto 0);
     DigSel : out std_logic_vector (7 downto 0); 
     LED : out std_logic_vector (15 downto 0)   
     );
@@ -75,7 +75,7 @@ Port(
     clk : in std_logic;
     Reset : in std_logic;
     Secuencia_Segm : in integer_vector (7 downto 0);  
-    Segm : out std_logic_vector (7 downto 0);
+    Segm : out std_logic_vector (6 downto 0);
     DigSel : out std_logic_vector (7 downto 0)
     );
 end component Visualizador;
@@ -153,7 +153,6 @@ begin
         Segm => Segm_S,
         DigSel => DigSel_S
         );   
-
 Segm <= Segm_S;
 DigSel <= DigSel_S;
 LED <= LED_S; 
