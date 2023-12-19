@@ -146,7 +146,7 @@ Reset_S <= not Reset;
         --IDetect : out std_logic;    --PARA PRUEBAS, LUEGO COMENTAR
         Precio => Precio_S,
         SecuenciaSegm => SecuenciaSegm_S,
-        LEDS_E_D => LED_S, --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero, el 5 devolucion de dinero
+        LEDS_E_D => LED_S, --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero, el 5 devolucion de dinero, el 6 LED inactividad
         Reset_D => Reset_D_S
         );
         
