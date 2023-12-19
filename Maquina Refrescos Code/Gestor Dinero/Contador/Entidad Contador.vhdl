@@ -16,12 +16,12 @@ end contador;
 
 architecture Behavioral of contador is
 
-signal entradas: std_logic_vector(3 downto 0) := "0000";  --señal auxiliar para poder hacer un case para combinaciones
+--signal entradas: std_logic_vector(3 downto 0) := "0000";  --señal auxiliar para poder hacer un case para combinaciones
 -- signal cuenta: integer := 0;  
 
 begin
 
-entradas <= (cent100,cent50,cent20,cent10);  --convertimos las 4 entradas logicas en un vector
+--entradas <= (cent100,cent50,cent20,cent10);  --convertimos las 4 entradas logicas en un vector
     process(clk,reset)  --process que solo varia cuando hay una variacion en el reloj o en reset (sincronizado)
     variable cuenta : integer := 0; --variable auxiliar para contado dinero
     begin
