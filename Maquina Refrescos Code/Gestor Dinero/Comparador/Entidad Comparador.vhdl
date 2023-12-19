@@ -5,9 +5,10 @@ use IEEE.NUMERIC_STD.ALL;
 entity comparador is
 Port(
     dinero_act: in integer;
-    precio: in integer;
+    Precio: in integer;
     clk: in std_logic;
     reset: in std_logic;
+    Reset_D : in std_logic;
     falta_dinero: out std_logic;
     dinero_justo: out std_logic;
     sobra_dinero: out std_logic);
@@ -25,8 +26,8 @@ begin
     
     begin
     
-    if reset = '1' then --se puede añadir un CE en lugar del reset
-        resultado := precio;
+    if reset = '1' or Reset_D = '1' then --se puede añadir un CE en lugar del reset
+        resultado := Precio;
         dinero_justo <= '0';
         falta_dinero <= '0';
         sobra_dinero <= '0';
