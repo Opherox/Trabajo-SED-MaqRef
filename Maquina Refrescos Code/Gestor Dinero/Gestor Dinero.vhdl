@@ -26,6 +26,7 @@ architecture Estructural of Gestor_Dinero is
         precio : in integer;
         clk : in std_logic;
         reset : in std_logic;
+        Reset_D : in std_logic; 
         falta_dinero : out std_logic;
         dinero_justo : out std_logic;
         sobra_dinero : out std_logic);
@@ -38,12 +39,13 @@ architecture Estructural of Gestor_Dinero is
         cent50 : in std_logic;
         cent100 : in std_logic;
         reset : in std_logic;
-        clk : in std_logic;
         Reset_D : in std_logic;
+        clk : in std_logic;
         dinero : out integer); 
      end component;
      
-    signal dinero_actual:integer; 
+signal dinero_actual : integer := 0;
+     
 begin
 
  cont: contador
@@ -63,6 +65,7 @@ begin
     precio=>precio,
     clk=>clk,
     reset=>reset,
+    Reset_D => Reset_D, 
     falta_dinero=>falta_dinero,
     dinero_justo=>dinero_justo,
     sobra_dinero=>sobra_dinero);
