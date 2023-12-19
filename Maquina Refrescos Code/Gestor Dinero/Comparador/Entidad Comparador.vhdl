@@ -20,7 +20,7 @@ architecture Behavioral of comparador is
 
 begin
 
-    process(clk,reset)
+    process(clk,reset,Reset_D)
     
     variable resultado : integer := Precio;
     
