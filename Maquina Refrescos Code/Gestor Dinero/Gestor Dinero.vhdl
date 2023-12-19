@@ -43,7 +43,7 @@ entity Gestor_Dinero is
         falta_dinero:out std_logic;
         sobra_dinero:out std_logic;
         dinero_justo:out std_logic;
-        diferencia : out integer);
+        dinero_act : out integer);
 end Gestor_Dinero;
 
 architecture Estructural of Gestor_Dinero is
@@ -56,8 +56,7 @@ architecture Estructural of Gestor_Dinero is
         reset: in std_logic;
         falta_dinero: out std_logic;
         dinero_justo: out std_logic;
-        sobra_dinero: out std_logic;
-        diferencia: out integer);
+        sobra_dinero: out std_logic);
      end component;
      
      component contador is
@@ -92,7 +91,8 @@ begin
     reset=>reset,
     falta_dinero=>falta_dinero,
     dinero_justo=>dinero_justo,
-    sobra_dinero=>sobra_dinero,
-    diferencia=>diferencia);
+    sobra_dinero=>sobra_dinero);
+    
+    dinero_act <= dinero_actual;
     
 end Estructural;
