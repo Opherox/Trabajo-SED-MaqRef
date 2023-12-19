@@ -39,8 +39,7 @@ Port(
     reset: in std_logic;
     falta_dinero: out std_logic;
     dinero_justo: out std_logic;
-    sobra_dinero: out std_logic;
-    diferencia: out integer);
+    sobra_dinero: out std_logic);
 end comparador;
 
 architecture Behavioral of comparador is
@@ -70,5 +69,4 @@ begin
         end if;
     end if;
     end process;
-diferencia <= resultado;
 end Behavioral;
