@@ -9,6 +9,7 @@ Port(
     cent50: in std_logic;  --entrada moneda 50 centimos
     cent100: in std_logic;  --entrada moneda 1 euro
     reset: in std_logic;  --reset del contador (viene del reset general)
+    Reset_D : in std_logic; 
     clk: in std_logic;  --reloj del sistema
     dinero: out integer);   --valor contado total en numerico (para facilidad de uso en el comparador)
 end contador;
@@ -20,7 +21,7 @@ begin
 entradas<=(cent100,cent50,cent20,cent10);  --convertimos las 4 entradas logicas en un vector
     process(clk,reset)  --process que solo varia cuando hay una variacion en el reloj o en reset (sincronizado)
     begin
-        if reset ='1' then 
+        if reset = '1' or Reset_D = '1' then 
             cuenta <= 0;  --si se produce un reset la cuenta a 0
         elsif rising_edge(clk) then
             case entradas is
