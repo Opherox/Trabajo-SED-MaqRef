@@ -88,6 +88,9 @@ signal DineroJusto_S : std_logic := '0';
 signal Dinero_S : integer := 0;     
 signal Reset_D_S : std_logic := '0';
 signal SecuenciaSegm_S : integer_vector (7 downto 0) := (others=> 0);
+signal Segm_S : std_logic_vector (6 downto 0) := "1111111";
+signal DigSel_S : std_logic_vector (7 downto 0) := "00000000";
+signal LED_S : std_logic_vector (15 downto 0) := "0000000000000000";
 
 begin
 
@@ -138,7 +141,7 @@ begin
         --IDetect : out std_logic;    --PARA PRUEBAS, LUEGO COMENTAR
         Precio => Precio_S,
         SecuenciaSegm => SecuenciaSegm_S,
-        LEDS_E_D => LED, --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero.
+        LEDS_E_D => LED_S, --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero.
         Reset_D => Reset_D_S
         );
         
@@ -147,8 +150,11 @@ begin
         clk => clk,
         Reset => Reset,
         Secuencia_Segm => SecuenciaSegm_S,  
-        Segm => Segm,
-        DigSel => DigSel
+        Segm => Segm_S,
+        DigSel => DigSel_S
         );   
-          
+Segm <= Segm_S;
+DigSel <= DigSel_S;
+LED <= LED_S; 
+         
 end Behavioral;
