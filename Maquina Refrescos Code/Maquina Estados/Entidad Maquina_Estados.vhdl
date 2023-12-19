@@ -18,7 +18,7 @@ Dinero: in integer;
 FaltaDinero: in std_logic;
 DineroJusto: in std_logic;
 SobraDinero: in std_logic;
-IDetect : out std_logic;    --PARA PRUEBAS, LUEGO COMENTAR
+--IDetect : out std_logic;    --PARA PRUEBAS, LUEGO COMENTAR
 Precio: out integer;
 SecuenciaSegm: out integer_vector (7 downto 0);
 LEDS_E_D: out std_logic_vector (15 downto 0); --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero.
@@ -54,7 +54,7 @@ Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B1
     if Reset = '1' then
         --Contador <= (others => '0');
         Contador_R <= Frecuencia_Reloj;
-        Contador_S <= 0; 
+        Contador_S <= 30; 
         InactividadDetectada <= '1'; 
     elsif rising_edge(clk) then
         if BotonesMonedas = "0000" and SwitchesProductos = "0000" then --botones sin pulsar y switches sin accionar
@@ -81,7 +81,7 @@ Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B1
             InactividadDetectada <= '0';
         end if;  
     end if;
-    IDetect <= InactividadDetectada;     
+    --IDetect <= InactividadDetectada;     
     end process;
 
 Registro_estados: process (RESET, CLK) --cambios estado sincronizados por reloj o reset asincrono
@@ -95,13 +95,15 @@ Registro_estados: process (RESET, CLK) --cambios estado sincronizados por reloj 
 
 Actualizador_estados: process (clk,InactividadDetectada, EstadoActual, SwitchesProductos, DineroJusto, SobraDinero, FaltaDinero)        --gestiona cambio de estados y outputs de reset_dinero y asignacion precio
     begin
-        if rising_edge(clk) then
+        if Reset = '1' then
+            EstadoSiguiente <= E0;
+        elsif rising_edge(clk) then
             if InactividadDetectada = '1' then              --si se detecta inactividad desde cualquier estado se vuelve al estado E0 (reposo)
                 EstadoSiguiente <= E0;
             elsif InactividadDetectada = '0' then           --si hay actividad se procede a cambios diferentes
                 if EstadoActual = E0 then                   --actividad en el estado de reposo supone pasar a E1 (seleccion de producto)
                     Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
-                    EstadoSiguiente <= E1;
+                    EstadoSiguiente <= E0;
                 elsif EstadoActual = E1 then                --en estado E1, dependiendo del producto elegido el precio se pone a algo, pero se pasa a E2 (insertar monedas)
                     Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
                     case SwitchesProductos is
