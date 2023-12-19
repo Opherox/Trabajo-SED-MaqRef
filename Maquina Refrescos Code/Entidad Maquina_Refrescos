@@ -91,8 +91,11 @@ signal SecuenciaSegm_S : integer_vector (7 downto 0) := (others=> 0);
 signal Segm_S : std_logic_vector (6 downto 0) := "1111111";
 signal DigSel_S : std_logic_vector (7 downto 0) := "00000000";
 signal LED_S : std_logic_vector (15 downto 0) := "0000000000000000";
+signal Reset_S : std_logic := '0';
 
 begin
+
+Reset_S <= not Reset;
 
     GE_I: gestor_entradas
     port map(
@@ -114,7 +117,7 @@ begin
         cent50 => Bot_S_E(2),
         cent100 => Bot_S_E(3),
         clk => clk,
-        reset => Reset,
+        reset => Reset_S,
         precio => Precio_S,
         falta_dinero => FaltaDinero_S,
         sobra_dinero => SobraDinero_S,
@@ -133,7 +136,7 @@ begin
         B50C => Bot_S_E(2), 
         B100C => Bot_S_E(3),
         clk => clk,
-        Reset => Reset,
+        Reset => Reset_S,
         Dinero => Dinero_S,
         FaltaDinero => FaltaDinero_S,
         DineroJusto => DineroJusto_S,
@@ -148,11 +151,12 @@ begin
     V_I : Visualizador
     port map(
         clk => clk,
-        Reset => Reset,
+        Reset => Reset_S,
         Secuencia_Segm => SecuenciaSegm_S,  
         Segm => Segm_S,
         DigSel => DigSel_S
         );   
+
 Segm <= Segm_S;
 DigSel <= DigSel_S;
 LED <= LED_S; 
