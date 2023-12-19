@@ -44,6 +44,7 @@ signal SecuenciaSegm_s: integer_vector (7 downto 0):= (others => 0);
 signal Contador_R : integer := Frecuencia_Reloj;
 signal Contador_S : integer := 0;
 signal Contador_ED : integer := 0;
+signal Contador_E3 : integer := 5*Frecuencia_Reloj;
 begin
 
 SwitchesProductos <= (SW_P4,SW_P3,SW_P2,SW_P1); --hacer un vector de interruptores para mas facilidad de uso (cases) 
@@ -54,7 +55,8 @@ Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B1
     if Reset = '1' then
         --Contador <= (others => '0');
         Contador_R <= Frecuencia_Reloj;
-        Contador_S <= 0; 
+        Contador_S <= 0;
+        Contador_E3 <= 5 * Frecuencia_Reloj; 
         InactividadDetectada <= '1'; 
     elsif rising_edge(clk) then
         if BotonesMonedas = "0000" and SwitchesProductos = "0000" then --botones sin pulsar y switches sin accionar
@@ -127,7 +129,12 @@ Actualizador_estados: process (clk,InactividadDetectada, EstadoActual, SwitchesP
                     end if;
                 elsif EstadoActual = E3 then
                     Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
-                    EstadoSiguiente <= E0 after 5000 ms;    --despues de 5 segundos se vuelve a estado reposo (tiempo de entrega producto)      
+                    if Contador_E3 > 0 then
+                        Contador_E3 <= Contador_E3 - 1;
+                    elsif Contador_E3 = 0 then              --despues de 5 segundos se vuelve a estado reposo (tiempo de entrega producto)                       
+                        EstadoSiguiente <= E0;     
+                        Contador_E3 <= 5 * Frecuencia_Reloj;
+                    end if;           
                 end if;
             end if;
         end if;    
@@ -148,7 +155,7 @@ Gestor_Precio: process (clk,EstadoActual)
         end if;   
     end process;
      
-Gestor_Salidas_LED: process (clk, EstadoActual, SobraDinero)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5)
+Gestor_Salidas_LED: process (clk, EstadoActual, SobraDinero, InactividadDetectada)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5), LED inactividad(6)
     begin
         if rising_edge(clk) then
             case EstadoActual is
@@ -167,7 +174,12 @@ Gestor_Salidas_LED: process (clk, EstadoActual, SobraDinero)      --gestor LEDS 
                     LEDS_E_D(4)<= '0';           --tras 2 segundos se apaga
                 end if;
             end if;
-            for i in 6 to 15 loop
+            if InactividadDetectada = '1' then
+                LEDS_E_D(6) <= '1';
+            else 
+                LEDS_E_D(6) <= '0';
+            end if;
+            for i in 7 to 15 loop
                 LEDS_E_D(i) <= '0';
             end loop;
         end if;
