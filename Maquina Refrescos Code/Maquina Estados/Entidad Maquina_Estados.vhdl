@@ -97,9 +97,11 @@ Actualizador_estados: process (clk,InactividadDetectada, EstadoActual, SwitchesP
     begin
         if Reset = '1' then
             EstadoSiguiente <= E0;
+            Reset_D <= '1';
         elsif rising_edge(clk) then
             if InactividadDetectada = '1' then              --si se detecta inactividad desde cualquier estado se vuelve al estado E0 (reposo)
                 EstadoSiguiente <= E0;
+                Reset_D <= '1';
             elsif InactividadDetectada = '0' then           --si hay actividad se procede a cambios diferentes
                 if EstadoActual = E0 then                   --actividad en el estado de reposo supone pasar a E1 (seleccion de producto)
                     Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
