@@ -22,7 +22,7 @@ architecture Behavioral of contador is
 begin
 
 --entradas <= (cent100,cent50,cent20,cent10);  --convertimos las 4 entradas logicas en un vector
-    process(clk,reset)  --process que solo varia cuando hay una variacion en el reloj o en reset (sincronizado)
+    process(clk,reset,Reset_D)  --process que solo varia cuando hay una variacion en el reloj o en reset (sincronizado)
     variable cuenta : integer := 0; --variable auxiliar para contado dinero
     begin
         if reset = '1' or Reset_D = '1' then 
