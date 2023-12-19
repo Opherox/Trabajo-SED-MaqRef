@@ -31,7 +31,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity gestor_de_dinero is
+entity Gestor_Dinero is
     Port(
         cent10:in std_logic;
         cent20:in std_logic;
@@ -44,9 +44,9 @@ entity gestor_de_dinero is
         sobra_dinero:out std_logic;
         dinero_justo:out std_logic;
         diferencia : out integer);
-end gestor_de_dinero;
+end Gestor_Dinero;
 
-architecture Estructural of gestor_de_dinero is
+architecture Estructural of Gestor_Dinero is
     
     component comparador is
         Port(
