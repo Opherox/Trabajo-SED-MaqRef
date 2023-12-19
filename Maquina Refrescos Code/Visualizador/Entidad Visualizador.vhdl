@@ -56,7 +56,7 @@ begin
 
     T_I : Timer
     port map(
-        Divider => 2000000,
+        Divider => 2,--2000000,
         clk => clk,
         Reset => Reset,
         clk_o => clk_o
@@ -79,5 +79,7 @@ begin
         Numero => DisplayNum,
         Segmentos => Segm
         );
-        
+
+DigSel <= DigSel_S;
+         
 end architecture;
