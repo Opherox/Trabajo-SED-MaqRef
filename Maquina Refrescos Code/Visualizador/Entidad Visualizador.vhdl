@@ -7,7 +7,7 @@ Port (
     clk : in std_logic;
     Reset : in std_logic;
     Secuencia_Segm : in integer_vector (7 downto 0);  
-    Segm : out std_logic_vector (7 downto 0);
+    Segm : out std_logic_vector (6 downto 0);
     DigSel : out std_logic_vector (7 downto 0)
     );
 end Visualizador;
