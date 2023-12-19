@@ -30,54 +30,44 @@ architecture Behavioral of Maquina_Estados is
 type Estados is (E0,E1,E2,E3);
 
 constant Frecuencia_Reloj : integer := 100000000; --100 para poder verlo en los testbench; --100MHz (reloj de la Nexys DDR4)
-constant Longitud_Contador : natural := 128; --ajustable por si hay sobrepaso de tamaño
---constant Tiempo_Inactividad : unsigned (Longitud_Contador downto 0) := to_unsigned(30 * Frecuencia_Reloj, Longitud_Contador+1) ; --los 30 segundos de inactividad
+--constant Longitud_Contador : natural := 128; --ajustable por si hay sobrepaso de tamaño
 
 signal EstadoActual: Estados := E0;
 signal EstadoSiguiente: Estados;
 signal InactividadDetectada: std_logic := '1'; --para deteccion de inactividad y consecuente paso a reposo
-signal SwitchesProductos: std_logic_vector  (3 downto 0) := "0000";
-signal BotonesMonedas: std_logic_vector  (3 downto 0) := "0000";
+--signal SwitchesProductos: std_logic_vector  (3 downto 0) := "0000";
+--signal BotonesMonedas: std_logic_vector  (3 downto 0) := "0000";
 signal Precio_s: integer := 1000000;
 signal SecuenciaSegm_s: integer_vector (7 downto 0):= (others => 0);
---signal Contador : unsigned(Longitud_Contador downto 0) := (others => '0');
 signal Contador_R : integer := Frecuencia_Reloj;
-signal Contador_S : integer := 0;
+signal Contador_S : integer := 30;
 signal Contador_ED : integer := 0;
 signal Contador_E3 : integer := 5*Frecuencia_Reloj;
 begin
 
-SwitchesProductos <= (SW_P4,SW_P3,SW_P2,SW_P1); --hacer un vector de interruptores para mas facilidad de uso (cases) 
-BotonesMonedas <= (B100C,B50C,B20C,B10C); --hacer un vector de botones para mas facilidad de uso (cases)  
+--SwitchesProductos <= (SW_P4,SW_P3,SW_P2,SW_P1); --hacer un vector de interruptores para mas facilidad de uso (cases) 
+--BotonesMonedas <= (B100C,B50C,B20C,B10C); --hacer un vector de botones para mas facilidad de uso (cases)  
 
-Actualizador_inactividad: process (clk,SW_P1,SW_P2,SW_P3,SW_P4,B10C,B20C,B50C,B100C,Reset)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
+Actualizador_inactividad: process (clk,B100C,B50C,B20C,B10C,SW_P4,SW_P3,SW_P2,SW_P1,Reset)        --Gestiona Inactividad, si hay alguien tocando alguna entrada Inactividad a 0, si un rato sin tocar Inactividad a 1
     begin
     if Reset = '1' then
-        --Contador <= (others => '0');
         Contador_R <= Frecuencia_Reloj;
-        Contador_S <= 0;
-        Contador_E3 <= 5 * Frecuencia_Reloj; 
+        Contador_S <= 30;      
         InactividadDetectada <= '1'; 
     elsif rising_edge(clk) then
-        if BotonesMonedas = "0000" and SwitchesProductos = "0000" then --botones sin pulsar y switches sin accionar
-            --if Contador /= 0 then --si el tiempo no ha llegado a 0 se sigue contando
-            --    Contador <= Contador - 1;
-            --elsif Contador = 0 then    --sino el tiempo es igual y se detecta inactividad 
-            --    InactividadDetectada <= '1';
-            --end if;
-            --prueba reductor reloj
-            if Contador_S < 30 then
+        if B100C = '0' and B50C = '0' and B20C = '0' and B10C = '0' and SW_P1 = '0' and SW_P1 = '0' and SW_P2 = '0' and SW_P3 = '0' and SW_P4 = '0' then
+        --if BotonesMonedas = "0000" and SwitchesProductos = "0000" then --botones sin pulsar y switches sin accionar
+            if Contador_S < 30 then --si no han pasado 30 segundos sigue contando
                 if Contador_R /= 0 then
                     Contador_R <= Contador_R - 1;
-                elsif Contador_R = 0 then
+                elsif Contador_R = 0 then   --si se cuenta 1s se suma al contador de segundos
                     Contador_S <= Contador_S + 1;
                     Contador_R <= Frecuencia_Reloj;
                 end if;
             elsif Contador_S = 30 then
-                InactividadDetectada <= '1';
+                InactividadDetectada <= '1';  --si han pasado 30 segundos se detecta inactividad
             end if;       
-        else --actividad en la entrada implica reiniciar el contador y no detectar actividad
-            --Contador <= Tiempo_Inactividad;
+        elsif B100C = '1' or B50C = '1' or B20C = '1' or B10C = '1' or SW_P1 = '1' or SW_P1 = '1' or SW_P2 = '1' or SW_P3 = '1' or SW_P4 = '1' then --actividad en la entrada implica reiniciar el contador y no detectar actividad
             Contador_R <= Frecuencia_Reloj;
             Contador_S <= 0;
             InactividadDetectada <= '0';
@@ -95,37 +85,50 @@ Registro_estados: process (RESET, CLK) --cambios estado sincronizados por reloj 
     end if;
     end process;    
 
-Actualizador_estados: process (clk,InactividadDetectada, EstadoActual, SwitchesProductos, DineroJusto, SobraDinero, FaltaDinero)        --gestiona cambio de estados y outputs de reset_dinero y asignacion precio
+Actualizador_estados: process (clk,InactividadDetectada, EstadoActual, SW_P4,SW_P3,SW_P2,SW_P1, DineroJusto, SobraDinero, FaltaDinero)        --gestiona cambio de estados y outputs de reset_dinero y asignacion precio
     begin
         if Reset = '1' then
             EstadoSiguiente <= E0;
             Reset_D <= '1';
+            Contador_E3 <= 5 * Frecuencia_Reloj; 
         elsif rising_edge(clk) then
             if InactividadDetectada = '1' then              --si se detecta inactividad desde cualquier estado se vuelve al estado E0 (reposo)
                 EstadoSiguiente <= E0;
                 Reset_D <= '1';
             elsif InactividadDetectada = '0' then           --si hay actividad se procede a cambios diferentes
                 if EstadoActual = E0 then                   --actividad en el estado de reposo supone pasar a E1 (seleccion de producto)
+                    EstadoSiguiente <= E1;
                     Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
-                    EstadoSiguiente <= E0;
-                elsif EstadoActual = E1 then                --en estado E1, dependiendo del producto elegido el precio se pone a algo, pero se pasa a E2 (insertar monedas)
-                    Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
-                    case SwitchesProductos is
-                        when "0001" => EstadoSiguiente <= E2; Precio_s <= 100; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
-                        when "0010" => EstadoSiguiente <= E2; Precio_s <= 120; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
-                        when "0100" => EstadoSiguiente <= E2; Precio_s <= 150; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
-                        when "1000" => EstadoSiguiente <= E2; Precio_s <= 200; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
-                        when others => EstadoSiguiente <= E1; --si hay dos interruptores, o mas, o ninguno accionados no se selecciona un producto (mas robusto)
-                    end case; 
+                elsif EstadoActual = E1 then                --en estado E1, dependiendo del producto elegido el precio se pone a algo, pero se pasa a E2 (insertar monedas)            
+                    if SW_P4 = '0' and SW_P3 = '0' and SW_P2 = '0' and SW_P1 = '1' then
+                        EstadoSiguiente <= E2; Precio_s <= 100; Reset_D <= '0';     --no se permite contar dinero si no estas en el estado correspondiente
+                    elsif SW_P4 = '0' and SW_P3 = '0' and SW_P2 = '1' and SW_P1 = '0' then
+                        EstadoSiguiente <= E2; Precio_s <= 120; Reset_D <= '0';     --no se permite contar dinero si no estas en el estado correspondiente
+                    elsif SW_P4 = '0' and SW_P3 = '1' and SW_P2 = '0' and SW_P1 = '0' then
+                        EstadoSiguiente <= E2; Precio_s <= 150; Reset_D <= '0';     --no se permite contar dinero si no estas en el estado correspondiente
+                    elsif SW_P4 = '1' and SW_P3 = '0' and SW_P2 = '0' and SW_P1 = '0' then
+                        EstadoSiguiente <= E2; Precio_s <= 200; Reset_D <= '0';     --no se permite contar dinero si no estas en el estado correspondiente
+                    else
+                         EstadoSiguiente <= E1; Reset_D <= '1';
+                    end if;
+                    --case SwitchesProductos is
+                    --    when "0001" => EstadoSiguiente <= E2; Precio_s <= 100; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
+                    --    when "0010" => EstadoSiguiente <= E2; Precio_s <= 120; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
+                    --    when "0100" => EstadoSiguiente <= E2; Precio_s <= 150; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
+                    --    when "1000" => EstadoSiguiente <= E2; Precio_s <= 200; Reset_D <= '0';             --ahora si se permitira contar dinero al contador
+                    --    when others => EstadoSiguiente <= E1; Reset_D <= '1';--si hay dos interruptores, o mas, o ninguno accionados no se selecciona un producto (mas robusto)
+                    --end case; 
                 elsif EstadoActual = E2 then                --transiciones desde estado introducir dinero
-                    Reset_D <= '0';
                     if DineroJusto = '1' then               --si dinero justo ir a estado entregar producto
                         EstadoSiguiente <= E3;
+                        Reset_D <= '1';
                     elsif SobraDinero = '1' then            --si sobra dinero error y devolver producto
                         EstadoSiguiente <= E1;
+                        Reset_D <= '1';
                         --LEDS_E_D(4) <= '1', '0' after 2000 ms;  --4 LED de error de dinero se enciende si se mete cantidad no exacta superando el precio. No se si deberia quedarse aqui o en el gestor de LEDS (process) por temas de fugacidad
-                    elsif FaltaDinero = '1' then
+                    elsif FaltaDinero = '1' then    
                         EstadoSiguiente <= E2;
+                        Reset_D <= '0';
                     end if;
                 elsif EstadoActual = E3 then
                     Reset_D <= '1';                         --no se permite contar dinero si no estas en el estado correspondiente
@@ -155,7 +158,7 @@ Gestor_Precio: process (clk,EstadoActual)
         end if;   
     end process;
      
-Gestor_Salidas_LED: process (clk, EstadoActual, SobraDinero, InactividadDetectada)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5), LED inactividad(6)
+Gestor_Salidas_LED: process (clk, EstadoActual, SobraDinero, InactividadDetectada)      --gestor LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5), LED inactividad(6), LED reset on (15)
     begin
         if rising_edge(clk) then
             case EstadoActual is
@@ -179,7 +182,12 @@ Gestor_Salidas_LED: process (clk, EstadoActual, SobraDinero, InactividadDetectad
             else 
                 LEDS_E_D(6) <= '0';
             end if;
-            for i in 7 to 15 loop
+            if Reset = '1' then
+                LEDS_E_D(15) <= '1';
+            else 
+                LEDS_E_D(15) <= '0';
+            end if; 
+            for i in 7 to 14 loop
                 LEDS_E_D(i) <= '0';
             end loop;
         end if;
