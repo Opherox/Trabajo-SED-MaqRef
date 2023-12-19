@@ -32,16 +32,17 @@ end component gestor_entradas;
 
 component Gestor_Dinero
 Port(
-    cent10:in std_logic;
-    cent20:in std_logic;
-    cent50:in std_logic;
-    cent100:in std_logic;
-    clk:in std_logic;
-    reset:in std_logic;
-    precio: in integer;
-    falta_dinero:out std_logic;
-    sobra_dinero:out std_logic;
-    dinero_justo:out std_logic;
+    cent10 : in std_logic;
+    cent20 : in std_logic;
+    cent50 : in std_logic;
+    cent100 : in std_logic;
+    clk : in std_logic;
+    reset : in std_logic;
+    Reset_D : in std_logic; 
+    precio : in integer;
+    falta_dinero : out std_logic;
+    sobra_dinero : out std_logic;
+    dinero_justo : out std_logic;
     dinero_act : out integer
     );
 end component Gestor_Dinero;
@@ -118,6 +119,7 @@ Reset_S <= not Reset;
         cent100 => Bot_S_E(3),
         clk => clk,
         reset => Reset_S,
+        Reset_D => Reset_D_S, 
         precio => Precio_S,
         falta_dinero => FaltaDinero_S,
         sobra_dinero => SobraDinero_S,
@@ -144,7 +146,7 @@ Reset_S <= not Reset;
         --IDetect : out std_logic;    --PARA PRUEBAS, LUEGO COMENTAR
         Precio => Precio_S,
         SecuenciaSegm => SecuenciaSegm_S,
-        LEDS_E_D => LED_S, --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero.
+        LEDS_E_D => LED_S, --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero, el 5 devolucion de dinero
         Reset_D => Reset_D_S
         );
         
@@ -155,8 +157,8 @@ Reset_S <= not Reset;
         Secuencia_Segm => SecuenciaSegm_S,  
         Segm => Segm_S,
         DigSel => DigSel_S
-        );   
-
+        );  
+         
 Segm <= Segm_S;
 DigSel <= DigSel_S;
 LED <= LED_S; 
