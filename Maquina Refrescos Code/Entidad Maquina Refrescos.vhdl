@@ -66,7 +66,7 @@ Port(
     --IDetect : out std_logic;    --PARA PRUEBAS, LUEGO COMENTAR
     Precio: out integer;
     SecuenciaSegm: out integer_vector (7 downto 0);
-    LEDS_E_D: out std_logic_vector (15 downto 0); --del 0 al 3 son LEDS para estados de la maquina, el 4 es el de error introduccion dinero.
+    LEDS_E_D: out std_logic_vector (15 downto 0); --LEDS de estado(0,3) y LED error dinero(4) y LED devolver dinero(5), LED inactividad(6), LED reset on (15)
     Reset_D: out std_logic
     );
 end component Maquina_Estados;
