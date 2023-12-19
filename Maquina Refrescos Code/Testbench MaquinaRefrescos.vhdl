@@ -51,12 +51,16 @@ Pruebas : process
 begin
     wait for 100 ns;
     Bot_tb(1) <= '1';
-    wait for 200 ns;
+    wait for 100 ns;
     Bot_tb(1) <= '0';  
-    wait for 300 ns;
-    SW_tb(1) <= '1';  
-    wait for 400 ns;
-    SW_tb(1) <= '0';  
+    wait for 100 ns;
+    SW_tb(0) <= '1';  
+    wait for 100 ns;
+    SW_tb(0) <= '0';  
+    wait for 100 ns;
+    Bot_tb(3) <= '1';
+    wait for 100 ns;
+    Bot_tb(3) <= '0';
     wait for 1000 ns;
     
 end process; 
