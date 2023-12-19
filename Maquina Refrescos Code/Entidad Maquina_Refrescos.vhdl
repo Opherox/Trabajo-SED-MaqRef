@@ -90,9 +90,9 @@ signal Dinero_S : integer := 0;
 signal Reset_D_S : std_logic := '0';
 signal SecuenciaSegm_S : integer_vector (7 downto 0) := (others=> 0);
 signal Segm_S : std_logic_vector (6 downto 0) := "1111110";
-signal DigSel_S : std_logic_vector (7 downto 0) := "00000000";
+signal DigSel_S : std_logic_vector (7 downto 0) := "11111111";
 signal LED_S : std_logic_vector (15 downto 0) := "0000000000000000";
-signal Reset_S : std_logic := '0';
+signal Reset_S : std_logic := '1';
 
 begin
 
@@ -123,7 +123,7 @@ Reset_S <= not Reset;
         precio => Precio_S,
         falta_dinero => FaltaDinero_S,
         sobra_dinero => SobraDinero_S,
-        dinero_justo => DineroJusto_s,
+        dinero_justo => DineroJusto_S,
         dinero_act => Dinero_S
         );
     
