@@ -17,7 +17,7 @@ end contador;
 architecture Behavioral of contador is
 
 --signal entradas: std_logic_vector(3 downto 0) := "0000";  --señal auxiliar para poder hacer un case para combinaciones
--- signal cuenta: integer := 0;  
+--signal cuenta: integer := 0;  
 
 begin
 
