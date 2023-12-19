@@ -29,13 +29,13 @@ begin
             cuenta := 0;  --si se produce un reset la cuenta a 0
         elsif rising_edge(clk) then
             if cent10 = '0' and cent20 = '0' and cent50 = '0' and cent100 = '1' then
-                cuenta := cuenta + 10;
-            elsif cent10 = '0' and cent20 = '0' and cent50 = '1' and cent100 = '0' then
-                cuenta := cuenta + 20;
-            elsif cent10 = '0' and cent20 = '1' and cent50 = '0' and cent100 = '0' then
-                cuenta := cuenta + 50;
-            elsif cent10 = '1' and cent20 = '0' and cent50 = '0' and cent100 = '0' then
                 cuenta := cuenta + 100;
+            elsif cent10 = '0' and cent20 = '0' and cent50 = '1' and cent100 = '0' then
+                cuenta := cuenta + 50;
+            elsif cent10 = '0' and cent20 = '1' and cent50 = '0' and cent100 = '0' then
+                cuenta := cuenta + 20;
+            elsif cent10 = '1' and cent20 = '0' and cent50 = '0' and cent100 = '0' then
+                cuenta := cuenta + 10;
             end if;    
             --case entradas is
             --    when "0001" => cuenta := cuenta+10;  --si hay flanco positivo en boton 10 centimos se suma 10 a cuenta
