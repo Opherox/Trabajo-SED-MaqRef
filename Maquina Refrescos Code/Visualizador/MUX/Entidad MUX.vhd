@@ -44,14 +44,14 @@ begin
      Process(SEL, input_integer_vector)
      begin
         case SEL is
-        when "00000001" => salida<=input_integer_vector(0);
-        when "00000010" => salida<=input_integer_vector(1);
-        when "00000100" => salida<=input_integer_vector(2);
-        when "00001000" => salida<=input_integer_vector(3);
-        when "00010000" => salida<=input_integer_vector(4);
-        when "00100000" => salida<=input_integer_vector(5);
-        when "01000000" => salida<=input_integer_vector(6);
-        when "10000000" => salida<=input_integer_vector(7);
+        when "11111110" => salida<=input_integer_vector(0);
+        when "11111101" => salida<=input_integer_vector(1);
+        when "11111011" => salida<=input_integer_vector(2);
+        when "11110111" => salida<=input_integer_vector(3);
+        when "11101111" => salida<=input_integer_vector(4);
+        when "11011111" => salida<=input_integer_vector(5);
+        when "10111111" => salida<=input_integer_vector(6);
+        when "01111111" => salida<=input_integer_vector(7);
         when others => salida<= input_integer_vector(0);
      end case;
      end process;
