@@ -24,6 +24,7 @@ clk_o_gen : process (clk, Reset)
         Counter <= Divider;
     elsif rising_edge (clk) then
         if Counter /= 0 then
+            clk_aux <= '0';
             Counter <= Counter - 1;
         elsif Counter = 0 then
             clk_aux  <= '1';
