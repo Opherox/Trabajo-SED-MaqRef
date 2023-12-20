@@ -13,7 +13,7 @@ entity SYNCHRNZR is
 end SYNCHRNZR;
 
 architecture Behavioral of SYNCHRNZR is
-  constant SIZE: integer := 10000;
+  constant SIZE: integer := 10000;  -- Tamaño del contador para que no se produzcan rebotes
   signal sreg : std_logic_vector(1 downto 0) := "00";
   signal counter: integer range 0 to SIZE :=0; 
 begin
@@ -23,9 +23,9 @@ begin
       counter <= counter + 1;
       if counter = SIZE-1 then
         counter <= 0;
-        sreg <= sreg(0) & ASYNC_IN;
+        sreg <= sreg(0) & ASYNC_IN;  -- Desplaza el valor de ASYNC_IN al registro
       end if;
     end if; 
   end process;
-  SYNC_OUT <= sreg(1);
+  SYNC_OUT <= sreg(1);  -- La salida sincronizada es el bit más significativo del registro
 end Behavioral;
